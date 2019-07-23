@@ -1,7 +1,6 @@
 package week1
 
 import (
-	"errors"
 	"strings"
 	"strconv"
 )
@@ -12,40 +11,40 @@ type simpleExpression struct {
 	operator string
 }
 
-func (exp *simpleExpression) parse (expStr string) (err error)  {
-	expElements := strings.Split(expStr, " ")
+func (expression *simpleExpression) parse (expressionString string) (err error)  {
+	elements := strings.Fields(expressionString)
 
-	if len(expElements) != 3 {
-		return errors.New(invalidExpresionMsg)
+	if len(elements) != 3 {
+		return errInvalidExpresion
 	}
 
-	exp.operator = expElements[1]
+	expression.operator = elements[1]
 
-	if exp.operand1, err = strconv.ParseFloat(expElements[0], 64); err != nil {
-		return errors.New(invalidOperandMsg)
+	if expression.operand1, err = strconv.ParseFloat(elements[0], 64); err != nil {
+		return errInvalidOperand
 	}
 	
-	if exp.operand2, err = strconv.ParseFloat(expElements[2], 64); err != nil{
-		return errors.New(invalidOperandMsg)
+	if expression.operand2, err = strconv.ParseFloat(elements[2], 64); err != nil{
+		return errInvalidOperand
 	}
 
 	return
 }
 
-func (exp *simpleExpression) calculate() (float64, error) {
-	switch exp.operator {
+func (expression *simpleExpression) calculate() (float64, error) {
+	switch expression.operator {
 	case "+":
-		return exp.operand1 + exp.operand2, nil
+		return expression.operand1 + expression.operand2, nil
 	case "-":
-		return exp.operand1 - exp.operand2, nil
+		return expression.operand1 - expression.operand2, nil
 	case "*":
-		return exp.operand1 * exp.operand2, nil
+		return expression.operand1 * expression.operand2, nil
 	case "/":
-		if exp.operand2 == 0 {
-			return 0, errors.New(dividedZyZeroMsg)
+		if expression.operand2 == 0 {
+			return 0, errDividedZyZero
 		}
-		return exp.operand1 / exp.operand2, nil
+		return expression.operand1 / expression.operand2, nil
 	default: 
-		return 0, errors.New(invalidOparatorMsg)
+		return 0, errInvalidOperator
 	}
 }

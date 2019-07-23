@@ -5,7 +5,7 @@ import (
 )
 
 func TestParse(t *testing.T) {
-	simpleExp := simpleExpression{}
+	simpleExpression := simpleExpression{}
 
 	checkNoError := func(t *testing.T, err error) {
 		t.Helper()
@@ -13,8 +13,8 @@ func TestParse(t *testing.T) {
 			t.Errorf("expected no error but got one")
 		}
 	}
-	
-	checkExpectedErrorMsg := func(t *testing.T, expectedErr, err string) {
+
+	checkExpectedErrorMessage := func(t *testing.T, expectedErr, err string) {
 		t.Helper()
 		if err != expectedErr {
 			t.Errorf("expected %q but got %q", expectedErr, err)
@@ -22,51 +22,51 @@ func TestParse(t *testing.T) {
 	}
 
 	t.Run("1 + 1 should be a valid expression", func(t *testing.T) {
-		result := simpleExp.parse("1 + 1")
+		result := simpleExpression.parse("1 + 1")
 		checkNoError(t, result)
 	})
 	t.Run("1 - 1 should be a valid expression", func(t *testing.T) {
-		result := simpleExp.parse("1 - 1")
+		result := simpleExpression.parse("1 - 1")
 		checkNoError(t, result)
 	})
 	t.Run("1 * 1 should be a valid expression", func(t *testing.T) {
-		result := simpleExp.parse("1 * 1")
+		result := simpleExpression.parse("1 * 1")
 		checkNoError(t, result)
 	})
 	t.Run("1 / 1 should be a valid expression", func(t *testing.T) {
-		result := simpleExp.parse("1 / 1")
+		result := simpleExpression.parse("1 / 1")
 		checkNoError(t, result)
 	})
-	
+
 	t.Run("1 % 1 should be a valid expression, even % operator is not supported", func(t *testing.T) {
-		result := simpleExp.parse("1 % 1")
+		result := simpleExpression.parse("1 % 1")
 		checkNoError(t, result)
 	})
-	
+
 	t.Run("1/ 1 should be an invalid expression", func(t *testing.T) {
-		result := simpleExp.parse("1/ 1")
-		checkExpectedErrorMsg(t, invalidExpresionMsg, result.Error())
+		result := simpleExpression.parse("1/ 1")
+		checkExpectedErrorMessage(t, invalidExpresionMessage, result.Error())
 	})
 	t.Run("1+1 should be an invalid expression", func(t *testing.T) {
-		result := simpleExp.parse("1+1")
-		checkExpectedErrorMsg(t, invalidExpresionMsg, result.Error())
+		result := simpleExpression.parse("1+1")
+		checkExpectedErrorMessage(t, invalidExpresionMessage, result.Error())
 	})
 	t.Run(" 1 + 1 should be an invalid expression", func(t *testing.T) {
-		result := simpleExp.parse(" 1+1")
-		checkExpectedErrorMsg(t, invalidExpresionMsg, result.Error())
+		result := simpleExpression.parse(" 1+1")
+		checkExpectedErrorMessage(t, invalidExpresionMessage, result.Error())
 	})
 	t.Run("1 -1 should be an invalid expression", func(t *testing.T) {
-		result := simpleExp.parse("1 -1")
-		checkExpectedErrorMsg(t, invalidExpresionMsg, result.Error())
+		result := simpleExpression.parse("1 -1")
+		checkExpectedErrorMessage(t, invalidExpresionMessage, result.Error())
 	})
-	
+
 	t.Run("a - 3 should be marked as invalid operand", func(t *testing.T) {
-		result := simpleExp.parse("a - 3")
-		checkExpectedErrorMsg(t, invalidOperandMsg, result.Error())
+		result := simpleExpression.parse("a - 3")
+		checkExpectedErrorMessage(t, invalidOperandMessage, result.Error())
 	})
 	t.Run("5 * 3 should be marked as invalid operand", func(t *testing.T) {
-		result := simpleExp.parse("a - 3")
-		checkExpectedErrorMsg(t, invalidOperandMsg, result.Error())
+		result := simpleExpression.parse("a - 3")
+		checkExpectedErrorMessage(t, invalidOperandMessage, result.Error())
 	})
 }
 
@@ -77,14 +77,14 @@ func TestCalculate(t *testing.T) {
 			t.Errorf("expected no error but got one")
 		}
 	}
-	
-	checkExpectedErrorMsg := func(t *testing.T, expectedErr, err string) {
+
+	checkExpectedErrorMessage := func(t *testing.T, expectedErr, err string) {
 		t.Helper()
 		if err != expectedErr {
 			t.Errorf("expected %q but got %q", expectedErr, err)
 		}
 	}
-	
+
 	checkExpectedResult := func(t *testing.T, expected, result float64) {
 		t.Helper()
 		if result != expected {
@@ -93,55 +93,55 @@ func TestCalculate(t *testing.T) {
 	}
 
 	t.Run("1 + 1 should be equal 2", func(t *testing.T) {
-		simpleExp := simpleExpression{1, 1, "+"}
-		result, _ := simpleExp.calculate()
+		simpleExpression := simpleExpression{1, 1, "+"}
+		result, _ := simpleExpression.calculate()
 		checkExpectedResult(t, 2, result)
 	})
 	t.Run("2 - 1 should be equal 1", func(t *testing.T) {
-		simpleExp := simpleExpression{2, 1, "-"}
-		result, _ := simpleExp.calculate()
+		simpleExpression := simpleExpression{2, 1, "-"}
+		result, _ := simpleExpression.calculate()
 		checkExpectedResult(t, 1, result)
 	})
 	t.Run("1 * 9 should be equal 9", func(t *testing.T) {
-		simpleExp := simpleExpression{1, 9, "*"}
-		result, _ := simpleExp.calculate()
+		simpleExpression := simpleExpression{1, 9, "*"}
+		result, _ := simpleExpression.calculate()
 		checkExpectedResult(t, 9, result)
 	})
 	t.Run("9 / 3 should be equal 3", func(t *testing.T) {
-		simpleExp := simpleExpression{9, 3, "/"}
-		result, _ := simpleExp.calculate()
+		simpleExpression := simpleExpression{9, 3, "/"}
+		result, _ := simpleExpression.calculate()
 		checkExpectedResult(t, 3, result)
 	})
 
 	t.Run("1 + 1 should be no error", func(t *testing.T) {
-		simpleExp := simpleExpression{1, 1, "+"}
-		_, err := simpleExp.calculate()
+		simpleExpression := simpleExpression{1, 1, "+"}
+		_, err := simpleExpression.calculate()
 		checkNoError(t, err)
 	})
 	t.Run("2 - 1 should be no error", func(t *testing.T) {
-		simpleExp := simpleExpression{2, 1, "-"}
-		_, err := simpleExp.calculate()
+		simpleExpression := simpleExpression{2, 1, "-"}
+		_, err := simpleExpression.calculate()
 		checkNoError(t, err)
 	})
 	t.Run("1 * 9 should be no error", func(t *testing.T) {
-		simpleExp := simpleExpression{1, 9, "*"}
-		_, err := simpleExp.calculate()
+		simpleExpression := simpleExpression{1, 9, "*"}
+		_, err := simpleExpression.calculate()
 		checkNoError(t, err)
 	})
 	t.Run("9 / 3 should be no error", func(t *testing.T) {
-		simpleExp := simpleExpression{9, 3, "/"}
-		_, err := simpleExp.calculate()
+		simpleExpression := simpleExpression{9, 3, "/"}
+		_, err := simpleExpression.calculate()
 		checkNoError(t, err)
 	})
-	
+
 	t.Run("9 / 0 should be marked as divided by zero", func(t *testing.T) {
-		simpleExp := simpleExpression{9, 0, "/"}
-		_, err := simpleExp.calculate()
-		checkExpectedErrorMsg(t, dividedZyZeroMsg, err.Error())
+		simpleExpression := simpleExpression{9, 0, "/"}
+		_, err := simpleExpression.calculate()
+		checkExpectedErrorMessage(t, dividedZyZeroMessage, err.Error())
 	})
 	t.Run("9 % 2 should be marked as invalid operator", func(t *testing.T) {
-		simpleExp := simpleExpression{9, 3, "%"}
-		_, err := simpleExp.calculate()
-		checkExpectedErrorMsg(t, invalidOparatorMsg, err.Error())
+		simpleExpression := simpleExpression{9, 3, "%"}
+		_, err := simpleExpression.calculate()
+		checkExpectedErrorMessage(t, invalidOperatorMessage, err.Error())
 	})
 }
