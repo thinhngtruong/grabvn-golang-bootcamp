@@ -22,8 +22,5 @@ func PingPong() {
 	}()
 
 	ping<- "ping"
-	// TODO: 
-	// - why does it work?
-	// - why if only have wait<- true cause deadlock?
 	wait<- true
 }

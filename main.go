@@ -16,4 +16,5 @@ func main() {
 	// week2.FanoutFanin()
 	// week2.PingPong()
 	// week2.TestScopeInForRange()
+	// week2.FanoutFaninWithPipeline()
 }

@@ -4,8 +4,6 @@ import "fmt"
 
 // BufferedVsUnbufferedChannels size 1 vs size 0
 func BufferedVsUnbufferedChannels() {
-	// TODO: confirm this
-
 	// buffered channel, buffered size = 1
 	ch := make(chan bool, 1)
 	ch<- true // not lock the current gorutine
