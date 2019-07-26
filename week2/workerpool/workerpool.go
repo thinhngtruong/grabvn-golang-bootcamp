@@ -40,7 +40,7 @@ func NewPool(numRoutines int) *Pool {
 	p.jobs = make(chan Job, numRoutines)
 	p.results = make(chan Result, numRoutines)
 	p.done = make(chan bool)
-	fmt.Println("[NewPool] Created a new Pool")
+	// fmt.Println("[NewPool] Created a new Pool")
 	return p
 }
 
@@ -60,7 +60,7 @@ func (p *Pool) Start(resources []interface{}, procFunc ProcessorFunc, resFunc Re
 // allocate allocates jobs based on an array of resources to be processed by the worker pool
 func (p *Pool) allocate(resources []interface{}) {
 	defer close(p.jobs)
-	fmt.Printf("[allocate] Start allocating [%d] resources\n", len(resources))
+	// fmt.Printf("[allocate] Start allocating [%d] resources\n", len(resources))
 	for i, v := range resources {
 		job := Job{id: i+1, resource: v}
 		p.jobs <- job
@@ -72,9 +72,9 @@ func (p *Pool) allocate(resources []interface{}) {
 func (p *Pool) work(wg *sync.WaitGroup, processor ProcessorFunc) {
 	defer wg.Done()
 	for job := range p.jobs {
-		fmt.Printf("[work] working on Job ID [%d]\n", job.id)
+		// fmt.Printf("[work] working on Job ID [%d]\n", job.id)
 		output := Result{job, processor(job.resource)}
-		fmt.Printf("[work] done with Job ID [%d]\n", job.id)
+		// fmt.Printf("[work] done with Job ID [%d]\n", job.id)
 		p.results <- output
 	}
 }
@@ -86,10 +86,10 @@ func (p *Pool) workerPool(processor ProcessorFunc) {
 	for i := 0; i < p.numRoutines; i++ {
 		wg.Add(1)
 		go p.work(&wg, processor)
-		fmt.Printf("[workerPool] Spawned work goRoutine [%d]\n", i+1)
+		// fmt.Printf("[workerPool] Spawned work goRoutine [%d]\n", i+1)
 	}
 	wg.Wait()
-	fmt.Println("[workerPool] all work goroutines done processing")
+	// fmt.Println("[workerPool] all work goroutines done processing")
 }
 
 // collect post processes the channel "Results" and calls the ResultProcessorFunc passed in as reference further processing.
