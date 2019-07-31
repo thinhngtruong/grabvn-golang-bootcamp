@@ -45,7 +45,6 @@ func readInputParams() []string {
 	return inputs
 }
 
-// TODO: improve performance incase have many files, sub directories
 func getAllDirectoryFiles(directory string) ([]string, error) {
 	var files []string
 

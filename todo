@@ -1,11 +1,17 @@
-TODO questions
+Questions
 
 1) send value to unbuffered channels block sender goroutine right away, send to buffered channels size 1: 
 - 1st time: wont block sender goroutine
-- 2nd time: will block sender goroutine?
-YES
+- 2nd time: will block sender goroutine? - YES
 
 2) why wait<- true in my ping pong program work (no one receive channel value)?
 
-4. map is value type or value type?
-refference type
+3) map is value type or value type? - refference type
+
+4) how to know how many worker in workerpool? - load test
+
+5) map is value type or refference type? - refference type
+
+
+TODO 
+
