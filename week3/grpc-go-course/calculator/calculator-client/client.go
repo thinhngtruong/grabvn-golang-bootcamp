@@ -19,7 +19,8 @@ func main() {
 	c := calculatorpb.NewCalculatorServiceClient(cc)
 
 	// doCalculate(c)
-	doPrimeNumberDecomposition(c)
+	// doPrimeNumberDecomposition(c)
+	doComputeAverage(c)
 }
 
 func doCalculate(c calculatorpb.CalculatorServiceClient) {
@@ -57,4 +58,39 @@ func doPrimeNumberDecomposition(c calculatorpb.CalculatorServiceClient) {
 		}
 		log.Println(msg.GetResult())
 	}
+}
+
+func doComputeAverage(c calculatorpb.CalculatorServiceClient) {
+	requests := []*calculatorpb.ComputeAverageRequest{
+		&calculatorpb.ComputeAverageRequest{
+			Number: 10,
+		},
+		&calculatorpb.ComputeAverageRequest{
+			Number: 11,
+		},
+		&calculatorpb.ComputeAverageRequest{
+			Number: 12,
+		},
+		&calculatorpb.ComputeAverageRequest{
+			Number: 13,
+		},
+		&calculatorpb.ComputeAverageRequest{
+			Number: 14,
+		},
+	}
+
+	stream, err := c.ComputeAverage(context.Background())
+	if err != nil { 
+		log.Fatalf("error while calling ComputeAverage RPC: %v", err)
+	}
+
+	for _, req := range requests {
+		stream.Send(req)
+	}
+
+	res, err := stream.CloseAndRecv()
+	if err != nil { 
+		log.Fatalf("error while calling LongGreet RPC: %v", err)
+	}
+	log.Println(res)
 }

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"math"
+	"io"
 	"google.golang.org/grpc"
 	"github.com/nhaancs/grabvn-golang-bootcamp/week3/grpc-go-course/calculator/calculatorpb"
 )
@@ -54,6 +55,30 @@ func (*server) PrimeNumberDecomposition(req *calculatorpb.PrimeNumberDecompositi
 	}
 
 	return nil
+}
+
+func (*server) ComputeAverage(stream calculatorpb.CalculatorService_ComputeAverageServer) error {
+	var numbers []int32
+
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			var total int32
+			for _, v := range numbers {
+				total += v
+			}
+			return stream.SendAndClose(&calculatorpb.ComputeAverageResponse{
+				Result: float32(total/int32(len(numbers))),
+			})
+		}
+
+		if err != nil {
+			log.Fatalf("failed while reading stream: %v", err)
+		}
+
+		number := req.GetNumber()
+		numbers = append(numbers, number)
+	}
 }
 
 func main() {
