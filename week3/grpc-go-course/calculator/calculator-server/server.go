@@ -6,8 +6,11 @@ import (
 	"net"
 	"math"
 	"io"
+	"fmt"
 	"google.golang.org/grpc"
 	"github.com/nhaancs/grabvn-golang-bootcamp/week3/grpc-go-course/calculator/calculatorpb"
+	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/codes"
 )
 
 type server struct{}
@@ -106,6 +109,20 @@ func (*server) FindMaximum(stream calculatorpb.CalculatorService_FindMaximumServ
 			}
 		}
 	}
+}
+
+func (*server) SquareRoot(ctx context.Context, req *calculatorpb.SquareRootRequest) (*calculatorpb.SquareRootResponse, error) {
+	number := req.GetNumber()
+	if number < 0 {
+		return nil, status.Errorf(
+			codes.InvalidArgument,
+			fmt.Sprintf("received a nagetive number: %v", number),
+		)
+	}
+
+	return &calculatorpb.SquareRootResponse{
+		Result: math.Sqrt(float64(number)),
+	}, nil
 }
 
 func main() {
