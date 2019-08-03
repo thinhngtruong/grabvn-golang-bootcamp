@@ -4,6 +4,7 @@ import (
 	"log"
 	"fmt"
 	"context"
+	"io"
 	"google.golang.org/grpc"
 	"github.com/nhaancs/grabvn-golang-bootcamp/week3/grpc-go-course/calculator/calculatorpb"
 )
@@ -16,7 +17,9 @@ func main() {
 	defer cc.Close()
 
 	c := calculatorpb.NewCalculatorServiceClient(cc)
-	doCalculate(c)
+
+	// doCalculate(c)
+	doPrimeNumberDecomposition(c)
 }
 
 func doCalculate(c calculatorpb.CalculatorServiceClient) {
@@ -33,4 +36,25 @@ func doCalculate(c calculatorpb.CalculatorServiceClient) {
 	}
 
 	fmt.Println(res.Result)
+}
+
+func doPrimeNumberDecomposition(c calculatorpb.CalculatorServiceClient) {
+	req := &calculatorpb.PrimeNumberDecompositionRequest{
+		Number: 105,
+	}
+	resStream, err := c.PrimeNumberDecomposition(context.Background(), req)
+	if err != nil { 
+		log.Fatalf("error while calling PrimeNumberDecomposition RPC: %v", err)
+	}
+
+	for {
+		msg, err := resStream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatalf("error while reading the stream: %v", err)
+		}
+		log.Println(msg.GetResult())
+	}
 }
