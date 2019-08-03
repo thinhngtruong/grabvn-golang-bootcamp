@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"context"
 	"io"
+	"time"
 	"google.golang.org/grpc"
 	"github.com/nhaancs/grabvn-golang-bootcamp/week3/grpc-go-course/calculator/calculatorpb"
 )
@@ -20,7 +21,8 @@ func main() {
 
 	// doCalculate(c)
 	// doPrimeNumberDecomposition(c)
-	doComputeAverage(c)
+	// doComputeAverage(c)
+	doFindMaximum(c)
 }
 
 func doCalculate(c calculatorpb.CalculatorServiceClient) {
@@ -93,4 +95,56 @@ func doComputeAverage(c calculatorpb.CalculatorServiceClient) {
 		log.Fatalf("error while calling LongGreet RPC: %v", err)
 	}
 	log.Println(res)
+}
+
+func doFindMaximum(c calculatorpb.CalculatorServiceClient) {
+	requests := []*calculatorpb.FindMaximumRequest {
+		&calculatorpb.FindMaximumRequest{
+			Number: 1,
+		},
+		&calculatorpb.FindMaximumRequest{
+			Number: 2,
+		},
+		&calculatorpb.FindMaximumRequest{
+			Number: 3,
+		},
+		&calculatorpb.FindMaximumRequest{
+			Number: 4,
+		},
+		&calculatorpb.FindMaximumRequest{
+			Number: 5,
+		},
+	}
+
+	stream, err := c.FindMaximum(context.Background())
+	if err != nil {
+		log.Fatalf("failed while calling GreetEveryone RPC: %v", err)
+	}
+
+	wait := make(chan bool)
+
+	go func() {
+		for _, req := range requests {
+			stream.Send(req)
+			time.Sleep(1 * time.Second)
+		}
+		stream.CloseSend()
+	}()
+	
+	go func() {
+		for {
+			res, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatalf("failed while reading stream: %v", err)
+				break
+			}
+			log.Println(res.GetResult())
+		}
+		close(wait)
+	}()
+
+	<-wait
 }
