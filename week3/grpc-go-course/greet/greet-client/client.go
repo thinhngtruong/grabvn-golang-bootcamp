@@ -7,6 +7,8 @@ import (
 	"io"
 	"time"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/codes"
 	"github.com/nhaancs/grabvn-golang-bootcamp/week3/grpc-go-course/greet/greetpb"
 )
 
@@ -21,7 +23,9 @@ func main() {
 	// doUnary(c)	
 	// doServeStreaming(c)
 	// doClientStreaming(c)
-	doBidirectionalStreaming(c)
+	// doBidirectionalStreaming(c)
+	doUnaryWithDeadline(c, 5*time.Second) // should complete
+	doUnaryWithDeadline(c, 1*time.Second) // should timeout
 }
 
 func doUnary(c greetpb.GreetServiceClient) {
@@ -182,4 +186,32 @@ func doBidirectionalStreaming(c greetpb.GreetServiceClient) {
 	}()
 
 	<-wait
+}
+
+func doUnaryWithDeadline(c greetpb.GreetServiceClient, timeout time.Duration) {
+	req := &greetpb.GreetWithDeadlineRequest{
+		Greeting: &greetpb.Greeting{
+			FirstName: "Nhan",
+			LastName: "Nguyen",
+		},
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	res, err := c.GreetWithDeadline(ctx, req)
+	if err != nil {
+		statusErr, ok := status.FromError(err)
+		if ok {
+			if statusErr.Code() == codes.DeadlineExceeded {
+				log.Println("Time out was hit!")
+			} else {
+				log.Printf("unexpected error: %v", statusErr)
+			}
+		} else {
+			log.Fatalf("error while calling Greeting: %v", statusErr)
+		}
+		return
+	}
+
+	fmt.Println(res.Result)
 }
