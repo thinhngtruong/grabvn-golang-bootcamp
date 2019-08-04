@@ -2,18 +2,20 @@ package main
 
 import (
 	"context"
+	"io"
 	"log"
 	"net"
 	"strconv"
 	"time"
-	"io"
-	"google.golang.org/grpc/status"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc"
+
 	"github.com/nhaancs/grabvn-golang-bootcamp/week3/grpc-go-course/greet/greetpb"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/status"
 )
 
-type server struct {}
+type server struct{}
 
 func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
 	firstName := req.GetGreeting().GetFirstName()
@@ -53,7 +55,7 @@ func (*server) LongGreet(stream greetpb.GreetService_LongGreetServer) error {
 
 		firstName := req.GetGreeting().GetFirstName()
 		result += "Hello " + firstName + ". "
-	}	
+	}
 }
 
 func (*server) GreetEveryone(stream greetpb.GreetService_GreetEveryoneServer) error {
@@ -80,14 +82,14 @@ func (*server) GreetEveryone(stream greetpb.GreetService_GreetEveryoneServer) er
 
 func (*server) GreetWithDeadline(ctx context.Context, req *greetpb.GreetWithDeadlineRequest) (*greetpb.GreetWithDeadlineResponse, error) {
 	for i := 0; i < 3; i++ {
-		// just in case client cancel outside, 
+		// just in case client cancel outside,
 		// not related to timeout
 		if ctx.Err() == context.Canceled {
 			log.Println("the client canceled the request")
 			return nil, status.Error(codes.Canceled, "the client canceled the request")
 		}
-		time.Sleep(1*time.Second)
-	} 
+		time.Sleep(1 * time.Second)
+	}
 	firstName := req.GetGreeting().GetFirstName()
 	result := "hello " + firstName
 	res := &greetpb.GreetWithDeadlineResponse{
@@ -102,7 +104,19 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	s := grpc.NewServer()
+	tls := true
+	opts := []grpc.ServerOption{}
+	if tls {
+		certFile := "ssl/server.crt"
+		keyFile := "ssl/server.pem"
+		creds, sslErr := credentials.NewServerTLSFromFile(certFile, keyFile)
+		if sslErr != nil {
+			log.Fatalf("failed loading certificates: %v", sslErr)
+		}
+		opts = append(opts, grpc.Creds(creds))
+	}
+
+	s := grpc.NewServer(opts...)
 	greetpb.RegisterGreetServiceServer(s, &server{})
 
 	if err := s.Serve(lis); err != nil {
