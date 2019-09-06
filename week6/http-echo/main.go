@@ -7,18 +7,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func main() {
-
-	// Create our server
-	logger := log.New()
-	server := Server{
-		logger: logger,
-	}
-
-	// Start the server
-	server.ListenAndServe()
-}
-
 // Server represents our server.
 type Server struct {
 	logger *log.Logger
@@ -40,10 +28,23 @@ func (s *Server) echo(writer http.ResponseWriter, request *http.Request) {
 	if rand.Intn(100) < 30 {
 		writer.WriteHeader(500)
 		writer.Write([]byte("a chaos monkey broke your server"))
+		log.Errorln("a chaos monkey broke your server")
 		return
 	}
 
 	// Happy path
 	writer.WriteHeader(200)
 	request.Write(writer)
+}
+
+func main() {
+
+	// Create our server
+	logger := log.New()
+	server := Server{
+		logger: logger,
+	}
+
+	// Start the server
+	server.ListenAndServe()
 }
