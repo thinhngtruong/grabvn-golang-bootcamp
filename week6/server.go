@@ -1,19 +1,19 @@
 package main
 
 import (
+	"log"
 	"math/rand"
 	"net/http"
 	"os"
-	"log"
 
-	"github.com/DataDog/datadog-go/statsd"
 	"github.com/nhaancs/grabvn-golang-bootcamp/week6/cslogger"
+	"github.com/nhaancs/grabvn-golang-bootcamp/week6/datadog"
 )
 
 // Server represents our server.
 type Server struct {
-	logger        cslogger.CSLogger
-	datadogClient *statsd.Client
+	logger  cslogger.CSLogger
+	datadog *datadog.Client
 }
 
 // ListenAndServe starts the server
@@ -30,18 +30,28 @@ func (s *Server) echo(writer http.ResponseWriter, request *http.Request) {
 
 	// 30% chance of failure
 	if rand.Intn(100) < 30 {
-		s.datadogClient.Count("fail", 1, []string{"localhost"}, 1)
 		writer.WriteHeader(500)
 		writer.Write([]byte("a chaos monkey broke your server"))
 		s.logger.Message("a chaos monkey broke your server")
+
+		tags := []string{"datadog-demo", "error"}
+		ok := s.datadog.Event("Error", "error", "server down", "a chaos monkey broke your server", "Demo App", tags)
+		if !ok {
+			log.Println("Cannot fire datadog event.")
+		}
 
 		return
 	}
 
 	// Happy path
-	s.datadogClient.Count("success", 1, []string{"localhost"}, 1)
 	writer.WriteHeader(200)
 	request.Write(writer)
+
+	tags := []string{"datadog-demo", "success"}
+	ok := s.datadog.Event("Error", "error", "server down", "a chaos monkey broke your server", "Demo App", tags)
+	if !ok {
+		log.Println("Cannot fire datadog event.")
+	}
 }
 
 func initLogger(logFile *os.File) cslogger.CSLogger {
@@ -55,19 +65,6 @@ func initLogger(logFile *os.File) cslogger.CSLogger {
 	return logger
 }
 
-func initDatadogClient() *statsd.Client {
-	client, err := statsd.New("127.0.0.1:8125",
-		statsd.WithNamespace("cs-grabvn-bootcamp."),                  // prefix every metric with the app name
-		statsd.WithTags([]string{"region:us-east-1a"}), // send the EC2 availability zone as a tag with every metric
-	)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return client
-}
-
 func main() {
 	logFile, err := os.OpenFile("log.log", os.O_WRONLY|os.O_CREATE, 0755)
 	if err == nil {
@@ -75,8 +72,8 @@ func main() {
 	}
 
 	server := Server{
-		logger:        initLogger(logFile),
-		datadogClient: initDatadogClient(),
+		logger:  initLogger(logFile),
+		datadog: datadog.Connect("demo-app", "127.0.0.1", "8125"),
 	}
 
 	// Start the server
